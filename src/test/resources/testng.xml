@@ -10,6 +10,8 @@
     <listeners>
         <listener class-name="io.vodqa.extreportng.listener.TNGReportListener" />
     </listeners>
+    
+    <parameter name="system.info" value="io.vodqa.extreportng.utils.GetSystemInfo"/>
 
     <test verbose="10" name="Tests" preserve-order="true">
         <classes>

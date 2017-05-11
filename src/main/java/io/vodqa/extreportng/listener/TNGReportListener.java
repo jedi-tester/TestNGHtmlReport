@@ -7,6 +7,8 @@ import com.aventstack.extentreports.Status;
 import com.aventstack.extentreports.reporter.ExtentHtmlReporter;
 import com.aventstack.extentreports.reporter.configuration.Theme;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import io.vodqa.extreportng.utils.SystemInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.*;
@@ -28,6 +30,7 @@ public class TNGReportListener implements ISuiteListener, ITestListener, IInvoke
     private static final String SUITE_ATTRIBUTE = "extentTestNgSuite";
     private ExtentReports extent;
     private List<String> testRunnerOutput;
+    private Map<String, String> systemInfo;
     private ExtentHtmlReporter htmlReporter;
     private static TNGReportListener instance;
 
@@ -82,11 +85,39 @@ public class TNGReportListener implements ISuiteListener, ITestListener, IInvoke
         instance = reportListener;
     }
 
+    public Map<String, String> getSystemInfo() {
+        return systemInfo;
+    }
+
+    public void setSystemInfo(Map<String, String> systemInfo) {
+        this.systemInfo = systemInfo;
+    }
+
     public void onStart(ISuite iSuite) {
         ExtentTest suite = extent.createTest(iSuite.getName());
 
+        String systemInfoCustomImplName = iSuite.getParameter("system.info");
+        if (!Strings.isNullOrEmpty(systemInfoCustomImplName)) {
+            generateSystemInfo(systemInfoCustomImplName);
+        }
+
         iSuite.setAttribute(REPORTER_ATTRIBUTE, extent);
         iSuite.setAttribute(SUITE_ATTRIBUTE, suite);
+    }
+
+    private void generateSystemInfo(String systemInfoCustomImplName) {
+        try {
+            Class<?> systemInfoCustomImplClazz = Class.forName(systemInfoCustomImplName);
+            if (!SystemInfo.class.isAssignableFrom(systemInfoCustomImplClazz)) {
+                throw new IllegalArgumentException("The given system.info class name <" + systemInfoCustomImplName +
+                        "> should implement the interface <" + SystemInfo.class.getName() + ">");
+            }
+
+            SystemInfo t = (SystemInfo) systemInfoCustomImplClazz.newInstance();
+            setSystemInfo(t.getSystemInfo(System.getProperty("user.dir") + "\\src\\test\\resources\\test.properties"));
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public void onFinish(ISuite iSuite) {
@@ -159,6 +190,11 @@ public class TNGReportListener implements ISuiteListener, ITestListener, IInvoke
     }
 
     public void generateReport(List<XmlSuite> list, List<ISuite> list1, String s) {
+        if (getSystemInfo() != null) {
+            for (Map.Entry<String, String> entry : getSystemInfo().entrySet()) {
+                extent.setSystemInfo(entry.getKey(), entry.getValue());
+            }
+        }
         extent.setTestRunnerOutput(testRunnerOutput);
         extent.flush();
     }
