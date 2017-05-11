@@ -1,22 +1,28 @@
 package io.vodqa.extreportng.listener;
 
-import com.aventstack.extentreports.AnalysisStrategy;
-import com.aventstack.extentreports.ExtentReports;
-import com.aventstack.extentreports.ExtentTest;
-import com.aventstack.extentreports.Status;
+import com.aventstack.extentreports.*;
+import com.aventstack.extentreports.markuputils.ExtentColor;
+import com.aventstack.extentreports.markuputils.Markup;
+import com.aventstack.extentreports.markuputils.MarkupHelper;
 import com.aventstack.extentreports.reporter.ExtentHtmlReporter;
 import com.aventstack.extentreports.reporter.configuration.Theme;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import io.vodqa.extreportng.extras.Utility;
+import io.vodqa.extreportng.utils.TestNodeName;
 import io.vodqa.extreportng.utils.SystemInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.openqa.selenium.WebElement;
 import org.testng.*;
 import org.testng.xml.XmlSuite;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static io.vodqa.extreportng.extras.Utility.getDriver;
 
 /**
  * Created by SergioLeone on 11/05/2017.
@@ -98,14 +104,14 @@ public class TNGReportListener implements ISuiteListener, ITestListener, IInvoke
 
         String systemInfoCustomImplName = iSuite.getParameter("system.info");
         if (!Strings.isNullOrEmpty(systemInfoCustomImplName)) {
-            generateSystemInfo(systemInfoCustomImplName);
+            generateSystemInfo(systemInfoCustomImplName, iSuite);
         }
 
         iSuite.setAttribute(REPORTER_ATTRIBUTE, extent);
         iSuite.setAttribute(SUITE_ATTRIBUTE, suite);
     }
 
-    private void generateSystemInfo(String systemInfoCustomImplName) {
+    private void generateSystemInfo(String systemInfoCustomImplName, ISuite iSuite) {
         try {
             Class<?> systemInfoCustomImplClazz = Class.forName(systemInfoCustomImplName);
             if (!SystemInfo.class.isAssignableFrom(systemInfoCustomImplClazz)) {
@@ -114,7 +120,7 @@ public class TNGReportListener implements ISuiteListener, ITestListener, IInvoke
             }
 
             SystemInfo t = (SystemInfo) systemInfoCustomImplClazz.newInstance();
-            setSystemInfo(t.getSystemInfo(System.getProperty("user.dir") + "\\src\\test\\resources\\test.properties"));
+            setSystemInfo(t.getSystemInfo(iSuite.getParameter("sysinfo.properties")));
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
