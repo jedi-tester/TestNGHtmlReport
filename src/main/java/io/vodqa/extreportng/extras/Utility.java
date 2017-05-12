@@ -91,7 +91,8 @@ public class Utility {
         public static final String getScriptStringFromFile(String sScriptFileName) throws IOException {
             log.debug("Converting file to string for: " + sScriptFileName);
             return FileUtils.readFileToString(
-                    new File(System.getProperty("user.basedir") + "\\js\\scripts\\" + sScriptFileName),
+                    new File(System.getProperty("user.dir") +
+                            "\\src\\main\\java\\io\\vodqa\\extreportng\\js\\scripts\\" + sScriptFileName),
                     Charset.defaultCharset());
         }
 

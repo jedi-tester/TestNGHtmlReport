@@ -16,7 +16,7 @@
 
     <test verbose="10" name="Tests" preserve-order="true">
         <classes>
-            <class name="io.vodqa.extreportng.TestClass1" />
+            <class name="io.vodqa.extreportng.TestClass2_Sel" />
         </classes>
     </test>
 
