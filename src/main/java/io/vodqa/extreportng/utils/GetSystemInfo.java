@@ -11,7 +11,7 @@ import java.util.*;
 
 public class GetSystemInfo implements SystemInfo {
     @Override
-    public Map<String, String> getSystemInfo(String filePath) {
+    public Map<String, String> getSystemInfoMap(String filePath) {
         FileInputStream fis;
         Map<String, String> systemInfo = null;
 

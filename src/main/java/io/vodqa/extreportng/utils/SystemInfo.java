@@ -16,7 +16,6 @@ public interface SystemInfo {
      * Add a map of system information and return as a map
      * @return The map of system information
      */
-//    Map<String, String> getSystemInfo();
-
-    Map<String, String> getSystemInfo(String filePath);
+//    Map<String, String> getSystemInfoMap();
+    Map<String, String> getSystemInfoMap(String filePath);
 }
