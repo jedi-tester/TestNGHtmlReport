@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.vodqa</groupId>
-    <artifactId>tngextreport</artifactId>
+    <artifactId>tnghtmlreport</artifactId>
     <packaging>jar</packaging>
 
-    <name>TestNGExtentReportListener</name>
+    <name>TestNGHtmlReport</name>
     <version>1.0.0</version>
     <description>A custom testng report listener</description>
-    <url>http://www.github.com/jedi-tester/TestNGExtentReportListener</url>
+    <url>https://github.com/jedi-tester/TestNGHtmlReport</url>
 
     <distributionManagement>
 <!--add distribution options for distributing with maven repo-->
@@ -25,14 +25,14 @@
     </licenses>
 
     <issueManagement>
-        <url>https://github.com/jedi-tester/TestNGExtentReportListener/issues</url>
+        <url>https://github.com/jedi-tester/TestNGHtmlReport/issues</url>
         <system>GitHub Issues</system>
     </issueManagement>
 
     <scm>
-        <url>https://github.com/jedi-tester/TestNGExtentReportListener</url>
-        <connection>scm:git:git://github.com/jedi-tester/TestNGExtentReportListener.git</connection>
-        <developerConnection>scm:git:git@github.com/jedi-tester/TestNGExtentReportListener.git</developerConnection>
+        <url>https://github.com/jedi-tester/TestNGHtmlReport</url>
+        <connection>scm:git:git://github.com/jedi-tester/TestNGHtmlReport.git</connection>
+        <developerConnection>scm:git:git@github.com/jedi-tester/TestNGHtmlReport.git</developerConnection>
     </scm>
 
     <developers>
