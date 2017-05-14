@@ -1,0 +1,6 @@
+.idea
+logs/
+seledrivers/
+target/
+test-output/
+src/test/java/io/vodqa/extreportng/Sandbox.java
