@@ -135,7 +135,7 @@ public class Utility {
             } else {
                 log.debug("Element is not displayed.");
                 try {
-                    throw new NoSuchElementException("Can not scroll to element - element not displayed. Locator: " + element);
+                    throw new NoSuchElementException("Error capturing screenshot with element, element not displayed. Locator: " + element);
                 } catch (Exception e) {
                     log.error(e.getMessage());
                     log.error(getExceptionMessage(e));
@@ -159,7 +159,7 @@ public class Utility {
             executeScript(jsScript, element);
         } else {
             try {
-                throw new NoSuchElementException("Can not scroll to element - element not displayed. Locator: " + element);
+                throw new NoSuchElementException("Error scrolling element into middle, element not displayed. Locator: " + element);
             } catch (Exception e) {
                 log.error(e.getMessage());
                 log.error(getExceptionMessage(e));
@@ -199,7 +199,7 @@ public class Utility {
                     } else {
                         log.debug("Element is not displayed.");
                         try {
-                            throw new NoSuchElementException("Can not scroll to element - element not displayed. Locator: " + element);
+                            throw new NoSuchElementException("Error scrolling element into middle. Element not displayed. Locator: " + element);
                         } catch (Exception e) {
                             log.error(e.getMessage());
                             log.error(getExceptionMessage(e));
