@@ -15,6 +15,14 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 
 /**
@@ -25,16 +33,18 @@ public abstract class AbstractTest {
 
     private static final Logger log = LogManager.getLogger(AbstractTest.class.getName());
 
-    private TNGReportListener report = TNGReportListener.getReportInstance();
-
     @BeforeSuite
-    public void driverSetUp() {
+    public void driverSetUp() throws IOException {
+        File propFile = new File(System.getProperty("user.dir") + "\\src\\test\\resources\\driver.properties");
+        FileInputStream fis = new FileInputStream(propFile);
+        ResourceBundle res = new PropertyResourceBundle(fis);
+
         LoggingPreferences preferences = new LoggingPreferences();
         preferences.enable("WARNING", Level.WARNING);
 
         DesiredCapabilities caps = DesiredCapabilities.firefox();
         caps.setCapability(CapabilityType.BROWSER_NAME, "firefox");
-        caps.setCapability(CapabilityType.BROWSER_VERSION, "53.0");
+        caps.setCapability(CapabilityType.BROWSER_VERSION, "53.0.2");
         caps.setCapability(CapabilityType.LOGGING_PREFS, preferences);
         caps.setCapability(CapabilityType.ENABLE_PROFILING_CAPABILITY, true);
         caps.setCapability(CapabilityType.ELEMENT_SCROLL_BEHAVIOR, 1);
@@ -68,11 +78,10 @@ public abstract class AbstractTest {
         options.addPreference("browser.taskbar.lists.recent.enabled", false);
         options.addPreference("browser.taskbar.lists.tasks.enabled", false);
 
-        options.setBinary("C:\\Users\\L094540\\IdeaProjects\\Browsers\\Firefox_53.0_64bit\\firefox.exe");
+        options.setBinary(res.getString("browserPath"));
         options.setLogLevel(Level.WARNING);
 
-        System.setProperty("webdriver.gecko.driver",
-                System.getProperty("user.dir") + "\\seledrivers\\geckodriver.exe");
+        System.setProperty("webdriver.gecko.driver", res.getString("driverPath"));
 
         driver = new FirefoxDriver(options.addTo(caps));
 
