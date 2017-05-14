@@ -45,18 +45,19 @@ public class TNGReportListener implements ISuiteListener, ITestListener, IInvoke
     private Map<String, String> systemInfo;
     private ExtentHtmlReporter htmlReporter;
     private static TNGReportListener instance;
+    private final String reportFolderName = getCurrentDateAndTime();
 
     public TNGReportListener() {
         setReportInstance(this);
         testRunnerOutput = new ArrayList<>();
-        System.setProperty("reportPath", System.getProperty("user.dir") + "\\test-output\\" + getCurrentDateAndTime());
+        System.setProperty("reportPath", System.getProperty("user.dir") + "\\test-output\\" + reportFolderName);
         String reportPathStr = System.getProperty("reportPath");
         File reportPath;
 
         try {
             reportPath = new File(reportPathStr);
         } catch (NullPointerException e) {
-            reportPath = new File(TestNG.DEFAULT_OUTPUTDIR);
+            reportPath = new File(TestNG.DEFAULT_OUTPUTDIR + reportFolderName);
         }
 
         if (!reportPath.exists()) {

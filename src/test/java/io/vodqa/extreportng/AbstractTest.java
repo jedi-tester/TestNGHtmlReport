@@ -1,7 +1,6 @@
 package io.vodqa.extreportng;
 
 import io.vodqa.extreportng.extras.Utility;
-import io.vodqa.extreportng.listener.TNGReportListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.Platform;
@@ -17,10 +16,7 @@ import org.testng.annotations.BeforeSuite;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
