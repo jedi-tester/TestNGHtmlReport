@@ -1,6 +1,6 @@
 package io.vodqa.extreportng;
 
-import io.vodqa.extreportng.extras.Utility;
+import io.vodqa.extreportng.extras.SeleUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.Platform;
@@ -40,7 +40,7 @@ public abstract class AbstractTest {
 
         DesiredCapabilities caps = DesiredCapabilities.firefox();
         caps.setCapability(CapabilityType.BROWSER_NAME, "firefox");
-        caps.setCapability(CapabilityType.BROWSER_VERSION, "53.0.2");
+        caps.setCapability(CapabilityType.BROWSER_VERSION, "53.0");
         caps.setCapability(CapabilityType.LOGGING_PREFS, preferences);
         caps.setCapability(CapabilityType.ENABLE_PROFILING_CAPABILITY, true);
         caps.setCapability(CapabilityType.ELEMENT_SCROLL_BEHAVIOR, 1);
@@ -81,7 +81,7 @@ public abstract class AbstractTest {
 
         driver = new FirefoxDriver(options.addTo(caps));
 
-        new Utility(driver);
+        new SeleUtil(driver);
     }
 
     @AfterSuite

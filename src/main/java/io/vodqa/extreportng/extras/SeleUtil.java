@@ -1,11 +1,18 @@
 package io.vodqa.extreportng.extras;
 
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.MediaEntityBuilder;
+import com.aventstack.extentreports.MediaEntityModelProvider;
+import com.aventstack.extentreports.Status;
+import com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
+import org.testng.ITestResult;
+import org.testng.Reporter;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,32 +24,36 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static io.vodqa.extreportng.extras.Utility.JSHelper.executeScript;
-import static io.vodqa.extreportng.extras.Utility.JSHelper.getScriptStringFromFile;
+import static io.vodqa.extreportng.extras.SeleUtil.JSHelper.executeScript;
+import static io.vodqa.extreportng.extras.SeleUtil.JSHelper.getScriptStringFromFile;
+import static io.vodqa.extreportng.listener.TNGReportListener.getExtentTest;
+import static io.vodqa.extreportng.listener.TNGReportListener.getExtentTestStatus;
+import static io.vodqa.extreportng.listener.TNGReportListener.getMethodName;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Created by SergioLeone on 12/05/2017.
  */
-public class Utility {
+public class SeleUtil {
 
-    private static final Logger log = LogManager.getLogger(Utility.class);
+    private static final Logger log = LogManager.getLogger(SeleUtil.class.getName());
 
     private static WebDriver driver;
 
-    public Utility(WebDriver driver) {
-        Utility.driver = driver;
+    public SeleUtil(WebDriver driver) {
+        SeleUtil.driver = SeleDriver.getSeleDriver(driver);
     }
 
-    public static WebDriver getDriver() {
-        return Utility.driver;
+    protected static WebDriver getDriver() {
+        log.debug("Returning driver: " + driver);
+        return driver;
     }
 
     public static class Highlight {
         private static WebElement lastElem = null;
         private static String lastBorder = null;
 
-        public static void highlightElement(WebElement elem) throws IOException {
+        static void highlightElement(WebElement elem) throws IOException {
             log.debug("Highlight element: " + elem);
             final String jsScript = getScriptStringFromFile("getElementBorder.js");
             unhighlightLast();
@@ -84,11 +95,11 @@ public class Utility {
         }
     }
 
-    public static class JSHelper {
+    static class JSHelper {
 
-        private static JavascriptExecutor js = (JavascriptExecutor)driver;
+        private static JavascriptExecutor js = (JavascriptExecutor)getDriver();
 
-        public static final String getScriptStringFromFile(String sScriptFileName) throws IOException {
+        static final String getScriptStringFromFile(String sScriptFileName) throws IOException {
             log.debug("Converting file to string for: " + sScriptFileName);
             return FileUtils.readFileToString(
                     new File(System.getProperty("user.dir") +
@@ -96,13 +107,13 @@ public class Utility {
                     Charset.defaultCharset());
         }
 
-        public static Object executeScript(String jsScript, Object... var) {
+        static Object executeScript(String jsScript, Object... var) {
             log.debug("Executing JS script");
             return js.executeScript(jsScript, var);
         }
     }
 
-    public static String captureScreenshot(WebDriver driver, String sScreenshotName) throws IOException {
+    private static String captureScreenshot(WebDriver driver, String sScreenshotName) throws IOException {
         try {
             log.debug("Attempting to capture screenshot");
             TakesScreenshot ts=(TakesScreenshot)driver;
@@ -121,7 +132,7 @@ public class Utility {
         }
     }
 
-    public static String captureScreenshot(WebDriver driver, String sScreenshotName, WebElement element, boolean highlight) throws Exception {
+    private static String captureScreenshot(WebDriver driver, String sScreenshotName, WebElement element, boolean highlight) throws Exception {
         log.debug("Attempting to capture screenshot of element: " + element);
         log.debug("Highlight parameter: " + highlight);
 
@@ -168,7 +179,7 @@ public class Utility {
         }
     }
 
-    public static void scrollElementIntoMiddle(WebElement element, boolean highlight) throws Exception {
+    private static void scrollElementIntoMiddle(WebElement element, boolean highlight) throws Exception {
         log.info("Attempting to move(scroll) to element with JavaScriptExecutor call");
 
         int counter = 0;
@@ -264,14 +275,226 @@ public class Utility {
         return displayed;
     }
 
-    public static Object waitUntil(Function function, int timeOutInSeconds) {
+    /**
+     * Adds a screenshot image file to the report.
+     * This method should only be used in the configuration method
+     * (i.e. in methods annotated with {@link org.testng.annotations.AfterMethod})
+     * and the {@link ITestResult} is the mandatory parameter
+     *
+     * Example:
+     * @code @AfterMethod doAfterMethodInvocation(ItestResult itestResult) {}
+     *
+     * @param iTestResult           The {@link ITestResult} object
+     * @param sScreenshotName       The image file name
+     * @throws IOException
+     */
+    public void addScreenCapture(ITestResult iTestResult, String sScreenshotName) throws IOException {
+        ExtentTest test = (ExtentTest) iTestResult.getAttribute("test");
+        test.addScreenCaptureFromPath(captureScreenshot(getDriver(), sScreenshotName));
+    }
+
+    /**
+     * Adds a screenshot image file to the report.
+     * This method should only be used in the configuration method
+     * (i.e. in methods annotated with {@link org.testng.annotations.AfterMethod})
+     * and the {@link ITestResult} is the mandatory parameter
+     * (@code @AfterMethod doAfterMethodInvocation(ItestResult itestResult) {})
+     *
+     * Additionally prior to taking a screenshot it will try to scroll element into view port
+     * and highlight it with a border based on boolean parameter
+     *
+     * @param iTestResult           The {@link ITestResult} object
+     * @param sScreenshotName       The image file name
+     * @param element               {@link WebElement} to be scrolled to and displayed in viewport
+     * @param highlight             boolean to highlight the element before taking screenshot
+     * @throws IOException
+     */
+    public void addScreenCapture(ITestResult iTestResult, String sScreenshotName, WebElement element, boolean highlight) throws Exception {
+        ExtentTest test = (ExtentTest) iTestResult.getAttribute("test");
+        test.addScreenCaptureFromPath(captureScreenshot(getDriver(), sScreenshotName, element, highlight));
+    }
+
+    /**
+     * Adds a screenshot image file to the report.
+     * This method should only be used in the configuration method
+     * (i.e. in methods annotated with {@link org.testng.annotations.AfterMethod})
+     * and the {@link ITestResult} is the mandatory parameter
+     * (@code @AfterMethod doAfterMethodInvocation(ItestResult itestResult) {})
+     *
+     * Screenshot name will be taken from invoked Test Method name and execution status (pass, fail, skip)
+     *
+     * @param iTestResult           The {@link ITestResult} object
+     * @throws IOException
+     */
+    private void addScreenCapture(ITestResult iTestResult) throws IOException {
+        ExtentTest test = (ExtentTest) iTestResult.getAttribute("test");
+        test.addScreenCaptureFromPath
+                (captureScreenshot(getDriver(),
+                        getMethodName(iTestResult) + "_" + getExtentTestStatus(iTestResult)));
+    }
+
+    /**
+     * Adds a screenshot image file to the report.
+     * This method should only be used in the configuration method
+     * (i.e. in methods annotated with {@link org.testng.annotations.AfterMethod})
+     * and the {@link ITestResult} is the mandatory parameter
+     * (@code @AfterMethod doAfterMethodInvocation(ItestResult itestResult) {})
+     *
+     * Screenshot name will be taken from invoked Test Method name and execution status (pass, fail, skip)
+     *
+     * Additionally prior to taking a screenshot it will try to scroll element into view port
+     * and highlight it with a border based on boolean parameter
+     *
+     * @param iTestResult           The {@link ITestResult} object
+     * @param element               {@link WebElement} to be scrolled to and displayed in viewport
+     * @param highlight             boolean to highlight the element before taking screenshot
+     * @throws IOException
+     */
+    public void addScreenCapture(ITestResult iTestResult, WebElement element, boolean highlight) throws Exception {
+        ExtentTest test = (ExtentTest) iTestResult.getAttribute("test");
+        test.addScreenCaptureFromPath
+                (captureScreenshot(getDriver(),
+                        getMethodName(iTestResult) + "_" + getExtentTestStatus(iTestResult),
+                        element, highlight));
+    }
+
+    /**
+     * Adds a screen shot image file to the report.
+     * This method should only be used in the {@link org.testng.annotations.Test} annotated method
+     *
+     * @param sScreenshotName   The image file name
+     * @throws IOException
+     */
+    public void addScreenCapture(String sScreenshotName) throws IOException {
+        ITestResult iTestResult = Reporter.getCurrentTestResult();
+        Preconditions.checkState(iTestResult != null);
+        ExtentTest test = (ExtentTest) iTestResult.getAttribute("test");
+        test.addScreenCaptureFromPath(captureScreenshot(getDriver(), sScreenshotName));
+    }
+
+    /**
+     * Adds a screen shot image file to the report.
+     * This method should only be used in the {@link org.testng.annotations.Test} annotated method
+     *
+     * Additionally prior to taking a screenshot it will try to scroll element into view port
+     * and highlight it with a border based on boolean parameter
+     *
+     * @param sScreenshotName   The image file name
+     * @param element               {@link WebElement} to be scrolled to and displayed in viewport
+     * @param highlight             boolean to highlight the element before taking screenshot
+     * @throws IOException
+     */
+    public void addScreenCapture(String sScreenshotName, WebElement element, boolean highlight) throws Exception {
+        ITestResult iTestResult = Reporter.getCurrentTestResult();
+        Preconditions.checkState(iTestResult != null);
+        ExtentTest test = (ExtentTest) iTestResult.getAttribute("test");
+        test.addScreenCaptureFromPath(captureScreenshot(getDriver(), sScreenshotName, element, highlight));
+    }
+
+    /**
+     * Adds a log to the test node and attaches
+     * a screenshot with a given name
+     *
+     * This method should only be used inside {@link org.testng.annotations.Test} annotated methods
+     *
+     * @param status            The log status
+     * @param sLogMessage       The log message
+     * @param sScreenshotName   The screenshot name to be attached to the log
+     */
+    public void addLogToTest(Status status, String sLogMessage, String sScreenshotName) throws IOException{
+        getExtentTest().log(status, sLogMessage, addMediaProvider(sScreenshotName));
+    }
+
+    /**
+     * Adds a log to the test node and attaches a screenshot with a given name
+     *
+     * Additionally prior to taking a screenshot it will try to scroll element into view port
+     * and highlight it with a border based on boolean parameter
+     *
+     * This method should only be used inside {@link org.testng.annotations.Test} annotated methods
+     *
+     * @param status            The log status
+     * @param sLogMessage       The log message
+     * @param sScreenshotName   The screenshot name to be attached to the log
+     * @param element           {@link WebElement} to be scrolled to and displayed in viewport
+     * @param highlight         boolean to highlight the element before taking screenshot
+     */
+    public void addLogToTest(Status status, String sLogMessage,
+                             String sScreenshotName, WebElement element, boolean highlight) throws Exception{
+        getExtentTest().log(status, sLogMessage, addMediaProvider(sScreenshotName, element, highlight));
+    }
+
+    /**
+     * Adds a log to the test node with a {@link Throwable} object details,
+     * and attaches a screenshot with a given name
+     *
+     * This method should only be used inside {@link org.testng.annotations.Test} annotated methods
+     *
+     * @param status            The log status
+     * @param t                 {@link Throwable} object
+     * @param sScreenshotName   Screenshot name to be attached to log
+     */
+    public void addLogToTest(Status status, Throwable t, String sScreenshotName) throws IOException {
+        getExtentTest().log(status, t, addMediaProvider(sScreenshotName));
+    }
+
+    /**
+     * Adds a log to the test node with a {@link Throwable} object details,
+     * and attaches a screenshot with a given name
+     *
+     * Additionally prior to taking a screenshot it will try to scroll element into view port
+     * and highlight it with a border based on boolean parameter
+     *
+     * This method should only be used inside {@link org.testng.annotations.Test} annotated methods
+     *
+     * @param status            The log status
+     * @param t                 {@link Throwable} object
+     * @param sScreenshotName   Screenshot name to be attached to log
+     * @param element           {@link WebElement} to be scrolled to and displayed in viewport
+     * @param highlight         boolean to highlight the element before taking screenshot
+     */
+    public void addLogToTest(Status status, Throwable t,
+                             String sScreenshotName, WebElement element, boolean highlight) throws Exception {
+        getExtentTest().log(status, t, addMediaProvider(sScreenshotName, element, highlight));
+    }
+
+    /**
+     * Media model provider method for attaching screenshot to logs with a given name.
+     *
+     * @param sScreenshotName   Custom screenshot name
+     * @return                  {@link MediaEntityModelProvider} object
+     * @throws                  IOException
+     */
+    private MediaEntityModelProvider addMediaProvider(String sScreenshotName) throws IOException {
+        return MediaEntityBuilder.createScreenCaptureFromPath
+                (captureScreenshot(getDriver(), sScreenshotName)).build();
+    }
+
+    /**
+     * Media model provider method for attaching screenshot to logs with a given name.
+     *
+     * Additionally prior to taking a screenshot it will try to scroll element into view port
+     * and highlight it with a border based on boolean parameter
+     *
+     * @param sScreenshotName   Custom screenshot name
+     * @param element           {@link WebElement} to be scrolled to and displayed in viewport
+     * @param highlight         boolean to highlight the element before taking screenshot
+     * @return                  {@link MediaEntityModelProvider} object
+     * @throws                  IOException
+     */
+    private MediaEntityModelProvider addMediaProvider(String sScreenshotName, WebElement element, boolean highlight) throws Exception {
+        return MediaEntityBuilder.createScreenCaptureFromPath
+                (captureScreenshot(getDriver(), sScreenshotName, element, highlight)).build();
+    }
+
+    private static Object waitUntil(Function function, int timeOutInSeconds) {
         FluentWait<WebDriver> wait = new FluentWait<>(driver)
                 .withTimeout(timeOutInSeconds, SECONDS);
 
         return wait.until(function);
     }
 
-    public static Object waitUntil(Function function, int timeOutInSeconds, int poolingInterval) {
+    private static Object waitUntil(Function function, int timeOutInSeconds, int poolingInterval) {
         Wait<WebDriver> wait = new FluentWait<>(driver)
                 .withTimeout(timeOutInSeconds, SECONDS)
                 .pollingEvery(poolingInterval, SECONDS);
@@ -279,7 +502,7 @@ public class Utility {
         return wait.until(function);
     }
 
-    public static Object waitUntil(Function function, int timeOutInSeconds, int poolingInterval, TimeUnit poolingIntervalUnit) {
+    private static Object waitUntil(Function function, int timeOutInSeconds, int poolingInterval, TimeUnit poolingIntervalUnit) {
         Wait<WebDriver> wait = new FluentWait<>(driver)
                 .withTimeout(timeOutInSeconds, SECONDS)
                 .pollingEvery(poolingInterval, poolingIntervalUnit);
@@ -287,7 +510,7 @@ public class Utility {
         return wait.until(function);
     }
 
-    public static Object waitUntil(Function function, int timeOutInSeconds, int poolingInterval, TimeUnit poolingIntervalUnit, Exception ignoredException) {
+    private static Object waitUntil(Function function, int timeOutInSeconds, int poolingInterval, TimeUnit poolingIntervalUnit, Exception ignoredException) {
         Wait<WebDriver> wait = new FluentWait<>(driver)
                 .withTimeout(timeOutInSeconds, SECONDS)
                 .pollingEvery(poolingInterval, poolingIntervalUnit)
@@ -296,7 +519,7 @@ public class Utility {
         return wait.until(function);
     }
 
-    public static Object waitUntil(Function function, int timeOutInSeconds, int poolingInterval, TimeUnit poolingIntervalUnit, Exception ignoredException, String sMessage) {
+    private static Object waitUntil(Function function, int timeOutInSeconds, int poolingInterval, TimeUnit poolingIntervalUnit, Exception ignoredException, String sMessage) {
         Wait<WebDriver> wait = new FluentWait<>(driver)
                 .withTimeout(timeOutInSeconds, SECONDS)
                 .pollingEvery(poolingInterval, poolingIntervalUnit)
@@ -306,12 +529,8 @@ public class Utility {
         return wait.until(function);
     }
 
-    public static String getCurrentMethodName() {
+    static String getCurrentMethodName() {
         return Thread.currentThread().getStackTrace()[2].getMethodName();
     }
-
-
-
-
 }
 
