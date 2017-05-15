@@ -499,7 +499,7 @@ public class TNGReportListener extends SeleUtil implements ISuiteListener, ITest
      * @return                  {@link MediaEntityModelProvider} object
      * @throws                  IOException
      */
-    private MediaEntityModelProvider addMediaProvider(String sScreenshotName) throws IOException {
+    public MediaEntityModelProvider addMediaProvider(String sScreenshotName) throws IOException {
         return MediaEntityBuilder.createScreenCaptureFromPath
                 (captureScreenshot(getDriver(), sScreenshotName)).build();
     }
@@ -516,7 +516,7 @@ public class TNGReportListener extends SeleUtil implements ISuiteListener, ITest
      * @return                  {@link MediaEntityModelProvider} object
      * @throws                  IOException
      */
-    private MediaEntityModelProvider addMediaProvider(String sScreenshotName, WebElement element, boolean highlight) throws Exception {
+    public MediaEntityModelProvider addMediaProvider(String sScreenshotName, WebElement element, boolean highlight) throws Exception {
         return MediaEntityBuilder.createScreenCaptureFromPath
                 (captureScreenshot(getDriver(), sScreenshotName, element, highlight)).build();
     }
