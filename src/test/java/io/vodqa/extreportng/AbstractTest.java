@@ -81,7 +81,7 @@ public abstract class AbstractTest {
 
         driver = new FirefoxDriver(options.addTo(caps));
 
-        new SeleUtil(driver);
+        SeleUtil.setReportDriver(driver);
     }
 
     @AfterSuite

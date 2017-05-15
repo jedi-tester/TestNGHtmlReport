@@ -34,17 +34,20 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 /**
  * Created by SergioLeone on 12/05/2017.
  */
-public class SeleUtil {
+public class SeleUtil implements SeleDriver {
 
     private static final Logger log = LogManager.getLogger(SeleUtil.class.getName());
 
     private static WebDriver driver;
 
-    public SeleUtil(WebDriver driver) {
+    public SeleUtil() {
+    }
+
+    public static void setReportDriver(WebDriver driver) {
         SeleUtil.driver = SeleDriver.getSeleDriver(driver);
     }
 
-    protected static WebDriver getDriver() {
+    static WebDriver getDriver() {
         log.debug("Returning driver: " + driver);
         return driver;
     }
