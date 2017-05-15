@@ -47,7 +47,7 @@ public class SeleUtil implements SeleDriver {
         SeleUtil.driver = SeleDriver.getSeleDriver(driver);
     }
 
-    static WebDriver getDriver() {
+    protected static WebDriver getDriver() {
         log.debug("Returning driver: " + driver);
         return driver;
     }
@@ -116,7 +116,7 @@ public class SeleUtil implements SeleDriver {
         }
     }
 
-    private static String captureScreenshot(WebDriver driver, String sScreenshotName) throws IOException {
+    protected static String captureScreenshot(WebDriver driver, String sScreenshotName) throws IOException {
         try {
             log.debug("Attempting to capture screenshot");
             TakesScreenshot ts=(TakesScreenshot)driver;
@@ -135,7 +135,7 @@ public class SeleUtil implements SeleDriver {
         }
     }
 
-    private static String captureScreenshot(WebDriver driver, String sScreenshotName, WebElement element, boolean highlight) throws Exception {
+    protected static String captureScreenshot(WebDriver driver, String sScreenshotName, WebElement element, boolean highlight) throws Exception {
         log.debug("Attempting to capture screenshot of element: " + element);
         log.debug("Highlight parameter: " + highlight);
 
@@ -276,218 +276,6 @@ public class SeleUtil implements SeleDriver {
         }
 
         return displayed;
-    }
-
-    /**
-     * Adds a screenshot image file to the report.
-     * This method should only be used in the configuration method
-     * (i.e. in methods annotated with {@link org.testng.annotations.AfterMethod})
-     * and the {@link ITestResult} is the mandatory parameter
-     *
-     * Example:
-     * @code @AfterMethod doAfterMethodInvocation(ItestResult itestResult) {}
-     *
-     * @param iTestResult           The {@link ITestResult} object
-     * @param sScreenshotName       The image file name
-     * @throws IOException
-     */
-    public void addScreenCapture(ITestResult iTestResult, String sScreenshotName) throws IOException {
-        ExtentTest test = (ExtentTest) iTestResult.getAttribute("test");
-        test.addScreenCaptureFromPath(captureScreenshot(getDriver(), sScreenshotName));
-    }
-
-    /**
-     * Adds a screenshot image file to the report.
-     * This method should only be used in the configuration method
-     * (i.e. in methods annotated with {@link org.testng.annotations.AfterMethod})
-     * and the {@link ITestResult} is the mandatory parameter
-     * (@code @AfterMethod doAfterMethodInvocation(ItestResult itestResult) {})
-     *
-     * Additionally prior to taking a screenshot it will try to scroll element into view port
-     * and highlight it with a border based on boolean parameter
-     *
-     * @param iTestResult           The {@link ITestResult} object
-     * @param sScreenshotName       The image file name
-     * @param element               {@link WebElement} to be scrolled to and displayed in viewport
-     * @param highlight             boolean to highlight the element before taking screenshot
-     * @throws IOException
-     */
-    public void addScreenCapture(ITestResult iTestResult, String sScreenshotName, WebElement element, boolean highlight) throws Exception {
-        ExtentTest test = (ExtentTest) iTestResult.getAttribute("test");
-        test.addScreenCaptureFromPath(captureScreenshot(getDriver(), sScreenshotName, element, highlight));
-    }
-
-    /**
-     * Adds a screenshot image file to the report.
-     * This method should only be used in the configuration method
-     * (i.e. in methods annotated with {@link org.testng.annotations.AfterMethod})
-     * and the {@link ITestResult} is the mandatory parameter
-     * (@code @AfterMethod doAfterMethodInvocation(ItestResult itestResult) {})
-     *
-     * Screenshot name will be taken from invoked Test Method name and execution status (pass, fail, skip)
-     *
-     * @param iTestResult           The {@link ITestResult} object
-     * @throws IOException
-     */
-    private void addScreenCapture(ITestResult iTestResult) throws IOException {
-        ExtentTest test = (ExtentTest) iTestResult.getAttribute("test");
-        test.addScreenCaptureFromPath
-                (captureScreenshot(getDriver(),
-                        getMethodName(iTestResult) + "_" + getExtentTestStatus(iTestResult)));
-    }
-
-    /**
-     * Adds a screenshot image file to the report.
-     * This method should only be used in the configuration method
-     * (i.e. in methods annotated with {@link org.testng.annotations.AfterMethod})
-     * and the {@link ITestResult} is the mandatory parameter
-     * (@code @AfterMethod doAfterMethodInvocation(ItestResult itestResult) {})
-     *
-     * Screenshot name will be taken from invoked Test Method name and execution status (pass, fail, skip)
-     *
-     * Additionally prior to taking a screenshot it will try to scroll element into view port
-     * and highlight it with a border based on boolean parameter
-     *
-     * @param iTestResult           The {@link ITestResult} object
-     * @param element               {@link WebElement} to be scrolled to and displayed in viewport
-     * @param highlight             boolean to highlight the element before taking screenshot
-     * @throws IOException
-     */
-    public void addScreenCapture(ITestResult iTestResult, WebElement element, boolean highlight) throws Exception {
-        ExtentTest test = (ExtentTest) iTestResult.getAttribute("test");
-        test.addScreenCaptureFromPath
-                (captureScreenshot(getDriver(),
-                        getMethodName(iTestResult) + "_" + getExtentTestStatus(iTestResult),
-                        element, highlight));
-    }
-
-    /**
-     * Adds a screen shot image file to the report.
-     * This method should only be used in the {@link org.testng.annotations.Test} annotated method
-     *
-     * @param sScreenshotName   The image file name
-     * @throws IOException
-     */
-    public void addScreenCapture(String sScreenshotName) throws IOException {
-        ITestResult iTestResult = Reporter.getCurrentTestResult();
-        Preconditions.checkState(iTestResult != null);
-        ExtentTest test = (ExtentTest) iTestResult.getAttribute("test");
-        test.addScreenCaptureFromPath(captureScreenshot(getDriver(), sScreenshotName));
-    }
-
-    /**
-     * Adds a screen shot image file to the report.
-     * This method should only be used in the {@link org.testng.annotations.Test} annotated method
-     *
-     * Additionally prior to taking a screenshot it will try to scroll element into view port
-     * and highlight it with a border based on boolean parameter
-     *
-     * @param sScreenshotName   The image file name
-     * @param element               {@link WebElement} to be scrolled to and displayed in viewport
-     * @param highlight             boolean to highlight the element before taking screenshot
-     * @throws IOException
-     */
-    public void addScreenCapture(String sScreenshotName, WebElement element, boolean highlight) throws Exception {
-        ITestResult iTestResult = Reporter.getCurrentTestResult();
-        Preconditions.checkState(iTestResult != null);
-        ExtentTest test = (ExtentTest) iTestResult.getAttribute("test");
-        test.addScreenCaptureFromPath(captureScreenshot(getDriver(), sScreenshotName, element, highlight));
-    }
-
-    /**
-     * Adds a log to the test node and attaches
-     * a screenshot with a given name
-     *
-     * This method should only be used inside {@link org.testng.annotations.Test} annotated methods
-     *
-     * @param status            The log status
-     * @param sLogMessage       The log message
-     * @param sScreenshotName   The screenshot name to be attached to the log
-     */
-    public void addLogToTest(Status status, String sLogMessage, String sScreenshotName) throws IOException{
-        getExtentTest().log(status, sLogMessage, addMediaProvider(sScreenshotName));
-    }
-
-    /**
-     * Adds a log to the test node and attaches a screenshot with a given name
-     *
-     * Additionally prior to taking a screenshot it will try to scroll element into view port
-     * and highlight it with a border based on boolean parameter
-     *
-     * This method should only be used inside {@link org.testng.annotations.Test} annotated methods
-     *
-     * @param status            The log status
-     * @param sLogMessage       The log message
-     * @param sScreenshotName   The screenshot name to be attached to the log
-     * @param element           {@link WebElement} to be scrolled to and displayed in viewport
-     * @param highlight         boolean to highlight the element before taking screenshot
-     */
-    public void addLogToTest(Status status, String sLogMessage,
-                             String sScreenshotName, WebElement element, boolean highlight) throws Exception{
-        getExtentTest().log(status, sLogMessage, addMediaProvider(sScreenshotName, element, highlight));
-    }
-
-    /**
-     * Adds a log to the test node with a {@link Throwable} object details,
-     * and attaches a screenshot with a given name
-     *
-     * This method should only be used inside {@link org.testng.annotations.Test} annotated methods
-     *
-     * @param status            The log status
-     * @param t                 {@link Throwable} object
-     * @param sScreenshotName   Screenshot name to be attached to log
-     */
-    public void addLogToTest(Status status, Throwable t, String sScreenshotName) throws IOException {
-        getExtentTest().log(status, t, addMediaProvider(sScreenshotName));
-    }
-
-    /**
-     * Adds a log to the test node with a {@link Throwable} object details,
-     * and attaches a screenshot with a given name
-     *
-     * Additionally prior to taking a screenshot it will try to scroll element into view port
-     * and highlight it with a border based on boolean parameter
-     *
-     * This method should only be used inside {@link org.testng.annotations.Test} annotated methods
-     *
-     * @param status            The log status
-     * @param t                 {@link Throwable} object
-     * @param sScreenshotName   Screenshot name to be attached to log
-     * @param element           {@link WebElement} to be scrolled to and displayed in viewport
-     * @param highlight         boolean to highlight the element before taking screenshot
-     */
-    public void addLogToTest(Status status, Throwable t,
-                             String sScreenshotName, WebElement element, boolean highlight) throws Exception {
-        getExtentTest().log(status, t, addMediaProvider(sScreenshotName, element, highlight));
-    }
-
-    /**
-     * Media model provider method for attaching screenshot to logs with a given name.
-     *
-     * @param sScreenshotName   Custom screenshot name
-     * @return                  {@link MediaEntityModelProvider} object
-     * @throws                  IOException
-     */
-    private MediaEntityModelProvider addMediaProvider(String sScreenshotName) throws IOException {
-        return MediaEntityBuilder.createScreenCaptureFromPath
-                (captureScreenshot(getDriver(), sScreenshotName)).build();
-    }
-
-    /**
-     * Media model provider method for attaching screenshot to logs with a given name.
-     *
-     * Additionally prior to taking a screenshot it will try to scroll element into view port
-     * and highlight it with a border based on boolean parameter
-     *
-     * @param sScreenshotName   Custom screenshot name
-     * @param element           {@link WebElement} to be scrolled to and displayed in viewport
-     * @param highlight         boolean to highlight the element before taking screenshot
-     * @return                  {@link MediaEntityModelProvider} object
-     * @throws                  IOException
-     */
-    private MediaEntityModelProvider addMediaProvider(String sScreenshotName, WebElement element, boolean highlight) throws Exception {
-        return MediaEntityBuilder.createScreenCaptureFromPath
-                (captureScreenshot(getDriver(), sScreenshotName, element, highlight)).build();
     }
 
     private static Object waitUntil(Function function, int timeOutInSeconds) {
