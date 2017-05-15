@@ -8,13 +8,10 @@ import java.util.Map;
 
 /**
  * Implement this interface to generate custom system information
- * and return back the {@link Map<String, String>} object.
+ * and return back the {@link Map} object.
  */
 public interface SystemInfo {
 
-    /**
-     *
-     * @return The {@link Map<String, String>} object of system information
-     */
     Map<String, String> getSystemInfoMap(String filePath);
+    
 }
