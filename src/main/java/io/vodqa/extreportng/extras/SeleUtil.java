@@ -103,6 +103,7 @@ public class SeleUtil implements SeleDriver {
                                 "\\src\\main\\java\\io\\vodqa\\extreportng\\js\\scripts\\" + sScriptFileName),
                         Charset.defaultCharset());
             } catch (IOException e) {
+                log.error("Exception found in method: " + getCurrentMethodName());
                 log.error(e.getMessage());
                 log.error(getExceptionMessage(e));
                 throw e;
@@ -116,6 +117,7 @@ public class SeleUtil implements SeleDriver {
             try {
                 return js.executeScript(jsScript, var);
             } catch (JavascriptException e) {
+                log.error("Exception found in method: " + getCurrentMethodName());
                 log.error(e.getMessage());
                 log.error(getExceptionMessage(e));
                 throw e;
@@ -136,6 +138,7 @@ public class SeleUtil implements SeleDriver {
             Highlight.unhighlightLast();
             return sScreenshotFilePath;
         } catch (IOException e) {
+            log.error("Exception found in method: " + getCurrentMethodName());
             log.error(e.getMessage());
             log.error(getExceptionMessage(e));
             throw e;
@@ -158,12 +161,14 @@ public class SeleUtil implements SeleDriver {
                 try {
                     throw new NoSuchElementException("Error capturing screenshot with element, element not displayed. Locator: " + element);
                 } catch (Exception e) {
+                    log.error("Exception found in method: " + getCurrentMethodName());
                     log.error(e.getMessage());
                     log.error(getExceptionMessage(e));
                     throw e;
                 }
             }
         } catch (Exception e) {
+            log.error("Exception found in method: " + getCurrentMethodName());
             log.error(e.getMessage());
             log.error(getExceptionMessage(e));
         }
@@ -182,6 +187,7 @@ public class SeleUtil implements SeleDriver {
             try {
                 throw new NoSuchElementException("Error scrolling element into middle, element not displayed. Locator: " + element);
             } catch (Exception e) {
+                log.error("Exception found in method: " + getCurrentMethodName());
                 log.error(e.getMessage());
                 log.error(getExceptionMessage(e));
                 throw e;
@@ -222,6 +228,7 @@ public class SeleUtil implements SeleDriver {
                         try {
                             throw new NoSuchElementException("Error scrolling element into middle. Element not displayed. Locator: " + element);
                         } catch (Exception e) {
+                            log.error("Exception found in method: " + getCurrentMethodName());
                             log.error(e.getMessage());
                             log.error(getExceptionMessage(e));
                             throw e;
@@ -238,8 +245,9 @@ public class SeleUtil implements SeleDriver {
                 try {
                     throw new Exception("Unable to scroll element into viewport");
                 } catch (Exception e) {
-                    log.debug(e.getMessage());
-                    log.debug(getExceptionMessage(e));
+                    log.error("Exception found in method: " + getCurrentMethodName());
+                    log.error(e.getMessage());
+                    log.error(getExceptionMessage(e));
                     throw e;
                 }
             }
@@ -265,7 +273,7 @@ public class SeleUtil implements SeleDriver {
         PrintWriter printWriter = new PrintWriter(writer);
         e.printStackTrace(printWriter);
         s = writer.toString();
-        System.err.println("ERROR: Exception Found Check the Log File");
+//        System.err.println("ERROR: Exception Found Check the Log File");
         return s;
     }
 
