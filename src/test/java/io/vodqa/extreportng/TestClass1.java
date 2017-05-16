@@ -23,7 +23,7 @@ public class TestClass1 {
 
     @Test
     public void test2_fail() {
-        Assert.assertEquals(fail, "pass", "This method should fail and message is displayed");
+        Assert.assertEquals(fail, "fail", "This method should fail and message is displayed");
     }
 
 }
