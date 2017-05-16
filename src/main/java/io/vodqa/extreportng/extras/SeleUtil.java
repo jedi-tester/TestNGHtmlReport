@@ -1,18 +1,11 @@
 package io.vodqa.extreportng.extras;
 
-import com.aventstack.extentreports.ExtentTest;
-import com.aventstack.extentreports.MediaEntityBuilder;
-import com.aventstack.extentreports.MediaEntityModelProvider;
-import com.aventstack.extentreports.Status;
-import com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
-import org.testng.ITestResult;
-import org.testng.Reporter;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,9 +19,6 @@ import java.util.function.Function;
 
 import static io.vodqa.extreportng.extras.SeleUtil.JSHelper.executeScript;
 import static io.vodqa.extreportng.extras.SeleUtil.JSHelper.getScriptStringFromFile;
-import static io.vodqa.extreportng.listener.TNGReportListener.getExtentTest;
-import static io.vodqa.extreportng.listener.TNGReportListener.getExtentTestStatus;
-import static io.vodqa.extreportng.listener.TNGReportListener.getMethodName;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -104,15 +94,32 @@ public class SeleUtil implements SeleDriver {
 
         static final String getScriptStringFromFile(String sScriptFileName) throws IOException {
             log.debug("Converting file to string for: " + sScriptFileName);
-            return FileUtils.readFileToString(
-                    new File(System.getProperty("user.dir") +
-                            "\\src\\main\\java\\io\\vodqa\\extreportng\\js\\scripts\\" + sScriptFileName),
-                    Charset.defaultCharset());
+
+            String jsScriptString;
+
+            try {
+                jsScriptString = FileUtils.readFileToString(
+                        new File(System.getProperty("user.dir") +
+                                "\\src\\main\\java\\io\\vodqa\\extreportng\\js\\scripts\\" + sScriptFileName),
+                        Charset.defaultCharset());
+            } catch (IOException e) {
+                log.error(e.getMessage());
+                log.error(getExceptionMessage(e));
+                throw e;
+            }
+
+            return jsScriptString;
         }
 
         static Object executeScript(String jsScript, Object... var) {
             log.debug("Executing JS script");
-            return js.executeScript(jsScript, var);
+            try {
+                return js.executeScript(jsScript, var);
+            } catch (JavascriptException e) {
+                log.error(e.getMessage());
+                log.error(getExceptionMessage(e));
+                throw e;
+            }
         }
     }
 
@@ -128,7 +135,7 @@ public class SeleUtil implements SeleDriver {
             log.debug("Copied screenshot to: " + sScreenshotFilePath);
             Highlight.unhighlightLast();
             return sScreenshotFilePath;
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.error(e.getMessage());
             log.error(getExceptionMessage(e));
             throw e;
@@ -233,6 +240,7 @@ public class SeleUtil implements SeleDriver {
                 } catch (Exception e) {
                     log.debug(e.getMessage());
                     log.debug(getExceptionMessage(e));
+                    throw e;
                 }
             }
         }
