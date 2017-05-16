@@ -1,12 +1,9 @@
 package io.vodqa.extreportng;
 
 import com.aventstack.extentreports.Status;
-import io.vodqa.extreportng.extras.SeleUtil;
 import io.vodqa.extreportng.listener.TNGReportListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -20,12 +17,12 @@ public class TestClass2_Sel extends AbstractTest {
 
     private TNGReportListener report = TNGReportListener.getReportInstance();
 
-    PageObject page;
+    private PageObject page;
 
     @Test
     public void test1_screenshot() throws Exception {
         log.debug("Driver is: " + driver);
-        driver.get("https://www.google.com");
+        driver.get("http://the-internet.herokuapp.com/");
         report.addLogToTest(Status.INFO, "Log Message for " + TNGReportListener.getMethodName(),
                 "screenshotname");
     }
@@ -35,10 +32,10 @@ public class TestClass2_Sel extends AbstractTest {
         page = PageFactory.initElements(driver, PageObject.class);
 
         new WebDriverWait(driver, 10)
-                .until(ExpectedConditions.visibilityOf(page.googleSearch));
+                .until(ExpectedConditions.visibilityOf(page.GEOLOCATION_LINK));
 
         report.addLogToTest(Status.INFO, "Log Message for " + TNGReportListener.getMethodName(),
-                "screenshotname", page.googleSearch, true);
+                "screenshotname", page.GEOLOCATION_LINK, true);
     }
 
 }

@@ -10,8 +10,8 @@ import org.openqa.selenium.support.FindBy;
 public class PageObject {
     private WebDriver driver;
 
-    @FindBy (xpath = "//input[@value=\"Google Search\"]")
-    public WebElement googleSearch;
+    @FindBy (xpath = "//a[@href=\'/geolocation\']")
+    public WebElement GEOLOCATION_LINK;
 
     public PageObject(WebDriver driver) {
         this.driver = driver;
