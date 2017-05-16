@@ -7,16 +7,22 @@ import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
+import sun.misc.Launcher;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -101,11 +107,6 @@ public class SeleUtil implements SeleDriver {
             String jsScriptString;
 
             try {
-                jsScriptString = FileUtils.readFileToString(
-                        new File(System.getProperty("user.dir") +
-                                "\\src\\main\\java\\io\\vodqa\\extreportng\\js\\scripts\\" + sScriptFileName),
-                        Charset.defaultCharset());
-
                 jsScriptString = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("scripts/" + sScriptFileName), Charset.defaultCharset());
             } catch (IOException e) {
                 log.error("Exception found in method: " + getCurrentMethodName());
@@ -113,6 +114,7 @@ public class SeleUtil implements SeleDriver {
                 log.error(getExceptionMessage(e));
                 throw e;
             }
+
             log.debug("Script string to be returned: " + jsScriptString);
             return jsScriptString;
         }
