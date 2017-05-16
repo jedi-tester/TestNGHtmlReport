@@ -1,6 +1,7 @@
 package io.vodqa.extreportng.extras;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.*;
@@ -17,8 +18,6 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static io.vodqa.extreportng.extras.SeleUtil.JSHelper.executeScript;
-import static io.vodqa.extreportng.extras.SeleUtil.JSHelper.getScriptStringFromFile;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -30,7 +29,11 @@ public class SeleUtil implements SeleDriver {
 
     private static WebDriver driver;
 
+    private SeleUtil.Highlight hiUtil = new Highlight();
+    private SeleUtil.JSHelper jsHelper = new JSHelper();
+
     public SeleUtil() {
+//        this.driver = driver;
     }
 
     public static void setReportDriver(WebDriver driver) {
@@ -42,41 +45,41 @@ public class SeleUtil implements SeleDriver {
         return driver;
     }
 
-    public static class Highlight {
-        private static WebElement lastElem = null;
-        private static String lastBorder = null;
+    public class Highlight {
+        private WebElement lastElem = null;
+        private String lastBorder = null;
 
-        static void highlightElement(WebElement elem) throws IOException {
+        void highlightElement(WebElement elem) throws IOException {
             log.debug("Highlight element: " + elem);
-            final String jsScript = getScriptStringFromFile("getElementBorder.js");
+            final String jsScript = jsHelper.getScriptStringFromFile("getElementBorder.js");
             unhighlightLast();
 
             // remember the new element
             log.debug("Getting last element: " + lastElem);
             lastElem = elem;
 
-            lastBorder = (String)executeScript(jsScript, elem);
+            lastBorder = (String)jsHelper.executeScript(jsScript, elem);
             log.debug("Highlighted: " + elem + "\n New border: " + lastBorder);
         }
 
-        public static void unhighlightElement(WebElement elem) throws IOException {
+        public void unhighlightElement(WebElement elem) throws IOException {
             log.debug("Unhighlight element: " + elem);
-            final String jsScript = getScriptStringFromFile("removeElementBorder.js");
+            final String jsScript = jsHelper.getScriptStringFromFile("removeElementBorder.js");
 
-            lastBorder = (String) executeScript(jsScript, elem);
+            lastBorder = (String) jsHelper.executeScript(jsScript, elem);
             log.debug("Unhighlighted: " + elem + "\n New border: " + lastBorder);
 
             lastElem = null;
         }
 
-        private static void unhighlightLast() throws IOException{
-            final String jsScript = getScriptStringFromFile("unhighlightLastElement.js");
+        private void unhighlightLast() throws IOException{
+            final String jsScript = jsHelper.getScriptStringFromFile("unhighlightLastElement.js");
 
             if (lastElem != null) {
                 log.debug("Unhighlight last element: " + lastElem);
                 try {
                     // if there already is a highlighted element, unhighlight it
-                    executeScript(jsScript, lastElem, lastBorder);
+                    jsHelper.executeScript(jsScript, lastElem, lastBorder);
                     log.debug("Unhighlighted last element: " + lastElem + "\n With border: " + lastBorder);
                 } catch (StaleElementReferenceException ignored) {
                     // the page got reloaded, the element isn't there
@@ -88,11 +91,11 @@ public class SeleUtil implements SeleDriver {
         }
     }
 
-    static class JSHelper {
+    class JSHelper {
 
-        private static JavascriptExecutor js = (JavascriptExecutor)getDriver();
+//        private JavascriptExecutor js = (JavascriptExecutor)getDriver();
 
-        static final String getScriptStringFromFile(String sScriptFileName) throws IOException {
+        final String getScriptStringFromFile(String sScriptFileName) throws IOException {
             log.debug("Converting file to string for: " + sScriptFileName);
 
             String jsScriptString;
@@ -102,21 +105,23 @@ public class SeleUtil implements SeleDriver {
                         new File(System.getProperty("user.dir") +
                                 "\\src\\main\\java\\io\\vodqa\\extreportng\\js\\scripts\\" + sScriptFileName),
                         Charset.defaultCharset());
+
+                jsScriptString = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("scripts/" + sScriptFileName), Charset.defaultCharset());
             } catch (IOException e) {
                 log.error("Exception found in method: " + getCurrentMethodName());
                 log.error(e.getMessage());
                 log.error(getExceptionMessage(e));
                 throw e;
             }
-
+            log.debug("Script string to be returned: " + jsScriptString);
             return jsScriptString;
         }
 
-        static Object executeScript(String jsScript, Object... var) {
+        Object executeScript(String jsScript, Object... var) {
             log.debug("Executing JS script");
             try {
-                return js.executeScript(jsScript, var);
-            } catch (JavascriptException e) {
+                return ((JavascriptExecutor)driver).executeScript(jsScript, var);
+            } catch (Exception e) {
                 log.error("Exception found in method: " + getCurrentMethodName());
                 log.error(e.getMessage());
                 log.error(getExceptionMessage(e));
@@ -125,7 +130,7 @@ public class SeleUtil implements SeleDriver {
         }
     }
 
-    protected static String captureScreenshot(WebDriver driver, String sScreenshotName) throws IOException {
+    protected String captureScreenshot(WebDriver driver, String sScreenshotName) throws IOException {
         try {
             log.debug("Attempting to capture screenshot");
             TakesScreenshot ts=(TakesScreenshot)driver;
@@ -135,7 +140,7 @@ public class SeleUtil implements SeleDriver {
             final String sScreenshotFilePath = sPath(sScreenshotName);
             FileUtils.copyFile(source, new File(sScreenshotFilePath));
             log.debug("Copied screenshot to: " + sScreenshotFilePath);
-            Highlight.unhighlightLast();
+            hiUtil.unhighlightLast();
             return sScreenshotFilePath;
         } catch (IOException e) {
             log.error("Exception found in method: " + getCurrentMethodName());
@@ -145,7 +150,7 @@ public class SeleUtil implements SeleDriver {
         }
     }
 
-    protected static String captureScreenshot(WebDriver driver, String sScreenshotName, WebElement element, boolean highlight) throws Exception {
+    protected String captureScreenshot(WebDriver driver, String sScreenshotName, WebElement element, boolean highlight) throws Exception {
         log.debug("Attempting to capture screenshot of element: " + element);
         log.debug("Highlight parameter: " + highlight);
 
@@ -176,13 +181,13 @@ public class SeleUtil implements SeleDriver {
         return captureScreenshot(driver, sScreenshotName);
     }
 
-    private static void scrollElementIntoMiddle(WebElement element) throws IOException {
+    private void scrollElementIntoMiddle(WebElement element) throws IOException {
         log.info("Attempting to move(scroll) to element with JavaScriptExecutor call");
 
-        String jsScript = getScriptStringFromFile("scrollElementIntoMiddle.js");
+        String jsScript = jsHelper.getScriptStringFromFile("scrollElementIntoMiddle.js");
 
         if (isElementDisplayed(element)) {
-            executeScript(jsScript, element);
+            jsHelper.executeScript(jsScript, element);
         } else {
             try {
                 throw new NoSuchElementException("Error scrolling element into middle, element not displayed. Locator: " + element);
@@ -195,7 +200,7 @@ public class SeleUtil implements SeleDriver {
         }
     }
 
-    private static void scrollElementIntoMiddle(WebElement element, boolean highlight) throws Exception {
+    private void scrollElementIntoMiddle(WebElement element, boolean highlight) throws Exception {
         log.info("Attempting to move(scroll) to element with JavaScriptExecutor call");
 
         int counter = 0;
@@ -209,17 +214,17 @@ public class SeleUtil implements SeleDriver {
                         scrollElementIntoMiddle(element);
                         log.debug("Waiting for element to be visible in viewport");
                         waitUntil
-                                (CustomConditions.
+                                (new CustomConditions().
                                         isElementInViewport(element), 3, 500, TimeUnit.MILLISECONDS);
                         log.debug("Element is visible. Attempting to highlight");
-                        Highlight.highlightElement(element);
+                        hiUtil.highlightElement(element);
                         break breakWhile;
                     } else if (isElementDisplayed(element)) {
                         log.debug("Element is displayed and highlight is: " + highlight);
                         scrollElementIntoMiddle(element);
                         log.debug("Waiting for element to be visible in viewport");
                         waitUntil
-                                (CustomConditions.
+                                (new CustomConditions().
                                         isElementInViewport(element), 3, 500, TimeUnit.MILLISECONDS);
                         log.debug("Element is visible");
                         break breakWhile;

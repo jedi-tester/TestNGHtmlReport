@@ -47,6 +47,7 @@ public class TNGReportListener extends SeleUtil implements ISuiteListener, ITest
     private final String reportFolderName = getCurrentDateAndTime();
 
     public TNGReportListener() {
+//        super(getDriver());
         setReportInstance(this);
         testRunnerOutput = new ArrayList<>();
         System.setProperty("reportPath", System.getProperty("user.dir") + "\\test-output\\" + reportFolderName);

@@ -51,6 +51,7 @@
         <jre.level>1.8</jre.level>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.sourceDir>${project.basedir}/src/main/java</project.sourceDir>
+        <project.jsSourceDir>${project.basedir}/src/main/java/io/vodqa/extreportng/js</project.jsSourceDir>
         <project.resourceDir>${project.basedir}/src/main/resources</project.resourceDir>
         <project.testSourceDir>${project.basedir}/src/test/java</project.testSourceDir>
         <project.testResourceDir>${project.basedir}/src/test/resources</project.testResourceDir>
@@ -62,6 +63,9 @@
         <resources>
             <resource>
                 <directory>${project.resourceDir}</directory>
+            </resource>
+            <resource>
+                <directory>${project.jsSourceDir}</directory>
             </resource>
         </resources>
         <testResources>
