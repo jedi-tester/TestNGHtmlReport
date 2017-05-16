@@ -9,6 +9,7 @@ import com.aventstack.extentreports.reporter.configuration.Theme;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import io.vodqa.extreportng.extras.SeleUtil;
+import io.vodqa.extreportng.utils.GetSystemInfo;
 import io.vodqa.extreportng.utils.SystemInfo;
 import io.vodqa.extreportng.utils.TestNodeName;
 import org.apache.logging.log4j.LogManager;
@@ -136,9 +137,8 @@ public class TNGReportListener extends SeleUtil implements ISuiteListener, ITest
             htmlReporter.loadXMLConfig(configFile);
         }
 
-        String systemInfoImplClassName = iSuite.getParameter("system.info");
-        if (!Strings.isNullOrEmpty(systemInfoImplClassName)) {
-            generateSystemInfo(systemInfoImplClassName, iSuite);
+        if (!Strings.isNullOrEmpty(iSuite.getParameter("sysinfo.props"))) {
+            generateSystemInfo(iSuite);
         }
 
         iSuite.setAttribute(REPORTER_ATTRIBUTE, extent);
@@ -152,23 +152,16 @@ public class TNGReportListener extends SeleUtil implements ISuiteListener, ITest
      * Properties file path should be included in testng.xml as a suite-level parameter
      * with name="sysinfo.properties"
      *
-     * @param systemInfoImplClassName   name of the class that houses implementation for
      * @param iSuite                    TestNG {@link ISuite} object
      *
      * @throws IllegalArgumentException If the specified class does not implement {@link SystemInfo}
      * @throws IllegalStateException    If the specified class is not found
      */
-    private void generateSystemInfo(String systemInfoImplClassName, ISuite iSuite) {
+    private void generateSystemInfo(ISuite iSuite) {
         try {
-            Class<?> systemInfoClass = Class.forName(systemInfoImplClassName);
-            if (!SystemInfo.class.isAssignableFrom(systemInfoClass)) {
-                throw new IllegalArgumentException("The given system.info class name <" + systemInfoImplClassName +
-                        "> should implement the interface <" + SystemInfo.class.getName() + ">");
-            }
-
-            SystemInfo t = (SystemInfo) systemInfoClass.newInstance();
-            setSystemInfo(t.getSystemInfoMap(iSuite.getParameter("sysinfo.properties")));
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            SystemInfo t = GetSystemInfo.class.newInstance();
+            setSystemInfo(t.getSystemInfoMap(iSuite.getParameter("sysinfo.props")));
+        } catch (InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -874,7 +867,7 @@ public class TNGReportListener extends SeleUtil implements ISuiteListener, ITest
      * @param status    The log status
      * @param markup    {@link Markup} object
      */
-     public void addLogToTest(Status status, Markup markup) {
+    public void addLogToTest(Status status, Markup markup) {
         getExtentTest().log(status, markup);
     }
 
