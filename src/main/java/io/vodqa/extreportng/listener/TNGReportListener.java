@@ -566,6 +566,30 @@ public class TNGReportListener extends SeleUtil implements ISuiteListener, ITest
     }
 
     /**
+     * Marks the node as failed and adds {@link Markup} object details.
+     *
+     * Before invoking the method set the node name using {@link TestNodeName}
+     *
+     * @param m The {@link Markup} object
+     */
+    public void failTheNode(Markup m) {
+        failTheNode(TestNodeName.getNodeName(), m);
+    }
+
+    /**
+     * Marks the node with a give name as failed and adds {@link Markup} object details.
+     *
+     * @param nodeName The name of the node
+     * @param m        The {@link Markup} object
+     */
+    public void failTheNode(String nodeName, Markup m) {
+        ITestResult result = Reporter.getCurrentTestResult();
+        Preconditions.checkState(result != null);
+        ExtentTest test = (ExtentTest) result.getAttribute(nodeName);
+        test.fail(m);
+    }
+
+    /**
      * Marks the node as failed and adds {@link Throwable} object details.
      *
      * Before invoking the method set the node name using {@link TestNodeName}
@@ -668,6 +692,132 @@ public class TNGReportListener extends SeleUtil implements ISuiteListener, ITest
     }
 
     /**
+     * Marks the node as passed and adds {@link Markup} object details.
+     *
+     * Before invoking the method set the node name using {@link TestNodeName}
+     *
+     * @param m The {@link Markup} object
+     */
+    public void passTheNode(Markup m) {
+        passTheNode(TestNodeName.getNodeName(), m);
+    }
+
+    /**
+     * Marks the node with a give name as passed and adds {@link Markup} object details.
+     *
+     * @param nodeName The name of the node
+     * @param m        The {@link Markup} object
+     */
+    public void passTheNode(String nodeName, Markup m) {
+        ITestResult result = Reporter.getCurrentTestResult();
+        Preconditions.checkState(result != null);
+        ExtentTest test = (ExtentTest) result.getAttribute(nodeName);
+        test.pass(m);
+    }
+
+    /**
+     * Marks the node as passed and adds {@link Throwable} object details.
+     *
+     * Before invoking the method set the node name using {@link TestNodeName}
+     *
+     * @param t The {@link Throwable} object
+     */
+    public void passTheNode(Throwable t) {
+        passTheNode(TestNodeName.getNodeName(), t);
+    }
+
+    /**
+     * Marks the node with a give name as passed and adds {@link Throwable} object details.
+     *
+     * @param nodeName The name of the node
+     * @param t        The {@link Throwable} object
+     */
+    public void passTheNode(String nodeName, Throwable t) {
+        ITestResult result = Reporter.getCurrentTestResult();
+        Preconditions.checkState(result != null);
+        ExtentTest test = (ExtentTest) result.getAttribute(nodeName);
+        test.pass(t);
+    }
+
+    /**
+     * Marks the node as passed and adds {@link Throwable} object details
+     * and media file from {@link MediaEntityModelProvider} object.
+     *
+     * Before invoking the method set the node name using {@link TestNodeName}
+     *
+     * @param t The         {@link Throwable} object
+     * @param provider      {@link MediaEntityModelProvider} object for attaching media file to node
+     */
+    public void passTheNode(Throwable t, MediaEntityModelProvider provider) {
+        passTheNode(TestNodeName.getNodeName(), t, provider);
+    }
+
+    /**
+     * Marks node with a given name as passed and adds {@link Throwable} object details
+     * and media file from {@link MediaEntityModelProvider} object.
+     *
+     * @param nodeName      The name of the node
+     * @param t             The {@link Throwable} object
+     * @param provider      {@link MediaEntityModelProvider} object for attaching media file to node
+     */
+    public void passTheNode(String nodeName, Throwable t, MediaEntityModelProvider provider) {
+        ITestResult result = Reporter.getCurrentTestResult();
+        Preconditions.checkState(result != null);
+        ExtentTest test = (ExtentTest) result.getAttribute(nodeName);
+        test.pass(t, provider);
+    }
+
+    /**
+     * Marks the node as passed. The node name should have been set already using {@link TestNodeName}
+     *
+     * @param logMessage The message to be logged
+     */
+    public void passTheNode(String logMessage) {
+        passTheNode(TestNodeName.getNodeName(), logMessage);
+    }
+
+    /**
+     * Marks the given node as passed
+     *
+     * @param nodeName   The name of the node
+     * @param logMessage The message to be logged
+     */
+    public void passTheNode(String nodeName, String logMessage) {
+        ITestResult result = Reporter.getCurrentTestResult();
+        Preconditions.checkState(result != null);
+        ExtentTest test = (ExtentTest) result.getAttribute(nodeName);
+        test.pass(logMessage);
+    }
+
+    /**
+     * Marks the node as passed and attaches media file to it
+     * using {@link MediaEntityModelProvider} object
+     *
+     * Before invoking the method set the node name using {@link TestNodeName}
+     *
+     * @param logMessage    The message to be logged
+     * @param provider      {@link MediaEntityModelProvider} object for attaching media file to node
+     */
+    public void passTheNode(String logMessage, MediaEntityModelProvider provider) {
+        passTheNode(TestNodeName.getNodeName(), provider, logMessage);
+    }
+
+    /**
+     * Marks node with a given name as passed and adds log message and media files to it
+     * using {@link MediaEntityModelProvider} object
+     *
+     * @param nodeName      The name of the node
+     * @param logMessage    The message to be logged
+     * @param provider      {@link MediaEntityModelProvider} object for attaching media file to node
+     */
+    public void passTheNode(String nodeName, MediaEntityModelProvider provider, String logMessage) {
+        ITestResult result = Reporter.getCurrentTestResult();
+        Preconditions.checkState(result != null);
+        ExtentTest test = (ExtentTest) result.getAttribute(nodeName);
+        test.pass(logMessage, provider);
+    }
+
+    /**
      * Marks the test as failed
      * and attaches a media file to it
      * using {@link MediaEntityModelProvider} object
@@ -733,6 +883,74 @@ public class TNGReportListener extends SeleUtil implements ISuiteListener, ITest
     public void failTheTest(Markup markup) {
         ExtentTest test = getExtentTest();
         test.fail(markup);
+    }
+
+    /**
+     * Marks the test as passed
+     * and attaches a media file to it
+     * using {@link MediaEntityModelProvider} object
+     *
+     * This method should only be used inside {@link org.testng.annotations.Test} annotated methods
+     *
+     * @param details String message to log into report
+     * @param provider      {@link MediaEntityModelProvider} object for attaching media file to node
+     */
+    public void passTheTest(String details, MediaEntityModelProvider provider) {
+        ExtentTest test = getExtentTest();
+        test.pass(details, provider);
+    }
+
+    /**
+     * Marks the test as passed
+     *
+     * This method should only be used inside {@link org.testng.annotations.Test} annotated methods
+     *
+     * @param details String message to log into report
+     */
+    public void passTheTest(String details) {
+        ExtentTest test = getExtentTest();
+        test.pass(details);
+    }
+
+    /**
+     * Marks the test as passed
+     * and attaches a {@link Throwable} object details,
+     * and a media file to it using {@link MediaEntityModelProvider} object
+     *
+     * This method should only be used inside {@link org.testng.annotations.Test} annotated methods
+     *
+     * @param t The         {@link Throwable} object
+     * @param provider      {@link MediaEntityModelProvider} object for attaching media file to node
+     */
+    public void passTheTest(Throwable t, MediaEntityModelProvider provider) {
+        ExtentTest test = getExtentTest();
+        test.pass(t, provider);
+    }
+
+    /**
+     * Marks the test as passed
+     * and attaches a {@link Throwable} object details.
+     *
+     * This method should only be used inside {@link org.testng.annotations.Test} annotated methods
+     *
+     * @param t The         {@link Throwable} object
+     */
+    public void passTheTest(Throwable t) {
+        ExtentTest test = getExtentTest();
+        test.pass(t);
+    }
+
+    /**
+     * Marks the test as passed
+     * and attaches {@link Markup} object to it.
+     *
+     * This method should only be used inside {@link org.testng.annotations.Test} annotated methods
+     *
+     * @param markup Markup object
+     */
+    public void passTheTest(Markup markup) {
+        ExtentTest test = getExtentTest();
+        test.pass(markup);
     }
 
     private static String getCurrentDateAndTime() {
